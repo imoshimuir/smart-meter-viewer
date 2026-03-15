@@ -1,12 +1,65 @@
 "use client";
 
-import { useMeterData } from "@/hooks/useMeterData";
+import { useMeterData, DataSource } from "@/hooks/useMeterData";
 import LiveTimestamp from "./LiveTimestamp";
 import MeterCard from "./MeterCard";
 import SavingsInsights from "./SavingsInsights";
 
+function ConnectionBar({
+  source,
+  liveWatts,
+  usingEstimated,
+}: {
+  source: DataSource;
+  liveWatts?: { electricity: number; gas: number };
+  usingEstimated: boolean;
+}) {
+  const configs = {
+    live: {
+      dot: "bg-emerald-400",
+      text: "text-emerald-400",
+      label: "Live — Geo Trio connected",
+    },
+    octopus: {
+      dot: "bg-yellow-400",
+      text: "text-yellow-400",
+      label: "Octopus historical data",
+    },
+    demo: {
+      dot: "bg-red-400",
+      text: "text-red-400",
+      label: "Demo mode",
+    },
+  };
+
+  const cfg = configs[source];
+
+  return (
+    <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/40 text-xs">
+      <span className={`flex items-center gap-1.5 font-medium ${cfg.text}`}>
+        <span className={`inline-block w-2 h-2 rounded-full ${cfg.dot}`} />
+        {cfg.label}
+        {source === "live" && liveWatts && (
+          <span className="ml-2 text-slate-400 font-normal">
+            {liveWatts.electricity.toLocaleString()} W live
+          </span>
+        )}
+      </span>
+      {usingEstimated && source !== "demo" && (
+        <span className="text-slate-500 italic">using estimated data</span>
+      )}
+    </div>
+  );
+}
+
+function footerText(source: DataSource): string {
+  if (source === "live") return "Live data via Geo Trio smart meter.";
+  if (source === "octopus") return "Historical data via Octopus Energy API.";
+  return "Data is simulated for demonstration.";
+}
+
 export default function Dashboard() {
-  const data = useMeterData();
+  const { data, status } = useMeterData();
 
   return (
     <div className="min-h-screen bg-[#0f1117] text-slate-100">
@@ -29,6 +82,13 @@ export default function Dashboard() {
           </div>
           <LiveTimestamp lastUpdated={data.lastUpdated} />
         </header>
+
+        {/* Connection status bar */}
+        <ConnectionBar
+          source={status.source}
+          liveWatts={status.liveWatts}
+          usingEstimated={status.usingEstimated}
+        />
 
         {/* Summary bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -101,7 +161,7 @@ export default function Dashboard() {
 
         {/* Footer */}
         <footer className="text-center text-xs text-slate-600 pb-4">
-          Data is simulated for demonstration. Updates every 5 seconds. &nbsp;·&nbsp;
+          {footerText(status.source)} Updates every {status.source === "live" ? "10" : status.source === "octopus" ? "60" : "5"} seconds. &nbsp;·&nbsp;
           Smart Meter Viewer &copy; {new Date().getFullYear()}
         </footer>
       </div>
