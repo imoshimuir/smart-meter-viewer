@@ -1,44 +1,56 @@
 # Smart Meter Viewer
 
-A web application for viewing and analysing smart meter energy data.
+A real-time home energy dashboard built with **Next.js 14 (App Router)** and **Tailwind CSS**. Shows electricity and gas usage broken down by household device, with live-updating mock data and personalised cost-saving insights.
 
-## Overview
+## Features
 
-Smart Meter Viewer lets you connect to your smart meter and visualise your energy consumption data — electricity and gas usage — in a clean, easy-to-read interface.
-
-## Features (planned)
-
-- 📊 View real-time and historical energy consumption
-- ⚡ Electricity and 🔥 gas usage dashboards
-- 📅 Daily, weekly, and monthly breakdowns
-- 💷 Cost estimates based on current tariff rates
-- 📈 Usage trends and insights
+- **Live donut charts** — inline SVG donut charts showing usage breakdown by device (fridge, washing machine, oven, heating, etc.)
+- **Electricity & Gas** — separate panels for each fuel type with daily kWh totals and estimated costs
+- **Summary bar** — combined cost today plus a monthly forecast at current rate
+- **Savings Insights** — 4 personalised tips (e.g. "Upgrade your fridge — save £120/year")
+- **Simulated live data** — small random fluctuations every 5 seconds with a live "Updated Xs ago" indicator
+- **Dark-mode first** — energy theme using blues, greens, and ambers on a dark slate background
 
 ## Tech Stack
 
-> TBD — to be decided during initial development
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Charts | Inline SVG (no external library) |
+| Data | Client-side mock hook with `setInterval` |
 
 ## Getting Started
 
 ```bash
-# Clone the repo
-git clone https://github.com/imoshimuir/smart-meter-viewer.git
-cd smart-meter-viewer
-
-# Install dependencies (once set up)
 npm install
-
-# Start the dev server
 npm run dev
 ```
 
-## Data Sources
+Open [http://localhost:3000](http://localhost:3000).
 
-Smart meter data can be accessed via:
-- [DCC (Data Communications Company)](https://www.smartdcc.co.uk/) — national smart meter network
-- [Octopus Energy API](https://developer.octopus.energy/) — if on Octopus tariff
-- [n3rgy](https://data.n3rgy.com/) — consumer data access
+## Project Structure
 
-## Licence
+```
+src/
+  app/
+    layout.tsx          # Root layout + metadata
+    page.tsx            # Mounts <Dashboard />
+    globals.css         # Tailwind import + base dark background
+  components/
+    Dashboard.tsx       # Top-level layout: header, summary bar, cards, insights
+    MeterCard.tsx       # Electricity / Gas card with stats + donut + legend
+    DonutChart.tsx      # Pure SVG donut chart, no deps
+    DeviceLegend.tsx    # Colour-keyed device breakdown list
+    LiveTimestamp.tsx   # Animated "Updated Xs ago" indicator
+    SavingsInsights.tsx # Four personalised saving tips
+  hooks/
+    useMeterData.ts     # Mock data + 5s interval fluctuation hook
+```
 
-MIT
+## Customising
+
+- **Real data**: swap `useMeterData.ts` with a fetch/WebSocket call to your smart meter API (e.g. n3rgy, Glowmarkt, or DCC's SMETS2 data).
+- **Rates**: update `ratePerKwh` in `useMeterData.ts` to reflect your current tariff.
+- **Devices**: edit the `BASE_DATA` arrays to match your actual household appliances.
